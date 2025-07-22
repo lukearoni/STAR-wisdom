@@ -31,6 +31,53 @@ x <- read_csv("https://raw.githubusercontent.com/PPBDS/bootcamp/refs/heads/maste
       select(g4math, kind, race, yearssmall)          
 ```
 
+```{r}
+library(tidyverse)
+
+# Clean and prep the data
+data_clean <- x %>%
+  filter(!is.na(g4math))     # Remove rows with missing g4math
+
+# Plot: Boxplot of g4math by kind and race
+ggplot(data_clean, aes(x = kind, y = g4math, fill = race)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +
+  geom_jitter(position = position_jitterdodge(jitter.width = 0.2), 
+              size = 1, alpha = 0.1) +
+  scale_fill_brewer(palette = "Set2") +
+  labs(
+    title = "4th Grade Math Scores by Class Type and Race",
+    x = "Class Type",
+    y = "4th Grade Math Score",
+    fill = "Race"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 15, hjust = 1)
+  )
+```
+
+```{r}
+#| warning: false
+
+data_clean <- x %>%  
+  filter(!is.na(g4math))
+
+# Histogram of g4math
+ggplot(data_clean, aes(x = g4math)) +
+  geom_histogram(aes(y = ..density..), bins = 30, fill = "#69b3a2", color = "white", alpha = 0.8) +
+  geom_density(color = "#1b4f72", size = 1) +
+  labs(
+    title = "Distribution of 4th Grade Math Scores",
+    x = "4th Grade Math Score",
+    y = "Density"
+  ) +
+  theme_minimal(base_size = 14) +
+  theme(
+    plot.title = element_text(face = "bold")
+  )
+```
+
 ## Background Information
 
 The Tennessee STAR dataset comes from a large-scale, multi-year educational experiment conducted in the 1980s across dozens of Tennessee schools. In the study, over 6,000 kindergarten through third-grade students were randomly assigned to either small classes (13–17 students), regular-sized classes (22–25 students), or regular-sized classes with a teacher’s aide. The goal was to determine whether smaller class sizes improved academic performance, particularly in mathematics and reading. Academic outcomes were measured using standardized and curriculum-based tests, and the dataset also includes key student and classroom characteristics such as race, sex, school, and class assignment. 
@@ -39,7 +86,7 @@ The Tennessee STAR dataset comes from a large-scale, multi-year educational expe
 
 1) Imagine that you are an elementary school principal in Chicago. You want to predict student performance. Fortunately, you have data today for your current students like the data available in the STAR project.
 
-2) Imagine you work for the Texas Department of Education. You want to understand student performance in small classes, relative to big classes, in Dallas. In Texas, there is data available like the data in the STAR project.
+**2) Imagine you work for the Texas Department of Education. You want to understand student performance in small classes, relative to big classes, in Dallas. In Texas, there is data available like the data in the STAR project.**
 
 
 ### Data
@@ -47,19 +94,51 @@ The Tennessee STAR dataset comes from a large-scale, multi-year educational expe
 * Explore the data. What is the outcome variable? How it is distributed?
 
 ```{r}
-x
+summary(x)
+view(x)
 ```
+
+Outcome variable is g4math, which is a standardized test score for mathematics. It is approximately normally distributed, with a strange high outlier spike. However, there are 3930 missing values.
 
 ### Preceptor Table
 
 What sorts of questions are we trying to answer?
 
+What is the causal effect between the treatments of a small class size and big class size on student academic performance in Dallas, Texas?
+
 In order to build the Preceptor Table, we need to answer some questions: Is the model causal or predictive? What are units? What are the outcomes? What are the covariates? What are the treatments?
 
+Causal model
+
+Units: individual students
+
+Outcomes: g4math score
+
+Covariates: race
+
+Treatments: class size (small, big, big with aid)
 
 ### Population Table 
 
 Describe in words the Population Table. For each of the four key assumption of Justice --- validity, stability, representativeness, and unconfoundedness --- provide a counter-example, if relevant. Describe the mathematical Structure of the model.
+
+**Population Table:** unit/time combination of individual students from across the US and year.
+
+**Validity:** consistency between columns from dataset and preceptor table.
+
+Counter example: g4math test grading guidelines were different in the data vs the current system in the preceptor table.
+
+**Stability:** columns don't change from passage of time.
+
+Counter example: data collected from previous years might not account for factors in the education system that have changed in the current years.
+
+**Representativeness:** data and preceptor table random samples from same population.
+
+Counter example: data collected in Tennesee does not accurrately represent the entire population of the US.
+
+**Unconfoundedness:** treatment is independently assigned.
+
+Counter example: class sizes could have been based off the level of the class. If smaller class sizes were associated with a higher education level, it would confound the g4math outcome.
 
 
 ## More Information
